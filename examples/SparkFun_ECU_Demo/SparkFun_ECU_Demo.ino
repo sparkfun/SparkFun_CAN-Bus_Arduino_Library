@@ -66,20 +66,32 @@ SoftwareSerial uart_gps(4,5);
 //Create instance of TinyGPS
 TinyGPS gps;
 
-//Declare porototype for TinyGPS library functions
+//Declare prototype for TinyGPS library functions
 void getgps(TinyGPS &gps);
+
+//Declare GPS variables
+float latitude;
+float longitude;
+int year;
+byte month;
+byte day;
+byte hour;
+byte minute;
+byte second;
+byte hundredths;
+float altitude;
+float gps_speed;
+char course;
 
 //Declare SD File
 File dataFile;
 
 //Declare CAN variables for communication
-byte EngineRPM;
-byte Coolant;
-byte Speed;
-byte Throttle;
-char buffer[64];  //Data will be temporarily stored to this buffer before being written to the file
-const int cs_CAN = 10;
-
+char *EngineRPM;
+char *Coolant;
+char *Speed;
+char *Throttle;
+char buffer[128];  //Data will be temporarily stored to this buffer before being written to the file
 
 //Define LCD Positions
 #define COMMAND 0xFE
@@ -105,7 +117,6 @@ void setup() {
   pinMode(CLICK,INPUT);
   pinMode(LED2, OUTPUT);
   pinMode(LED3, OUTPUT);
-  pinMode(cs_CAN, OUTPUT);
   
   //Pull analog pins high to enable reading of joystick movements
   digitalWrite(CLICK, HIGH);
@@ -166,24 +177,32 @@ void loop(){
     
       digitalWrite(LED3, HIGH); //Turn on LED to indicate CAN Bus traffic
       
-      EngineRPM = Canbus.ecu_req(ENGINE_RPM,buffer); //Request engine RPM
-      Serial.print("Engine RPM: "); //Uncomment for Serial debugging
-      Serial.println(EngineRPM);
-     
-      Speed = Canbus.ecu_req(VEHICLE_SPEED,buffer); //Request Vehicle speed
-      Serial.print("Vehicle speed: "); //Uncomment for Serial debugging
-      Serial.println(Speed);
-      
-      Coolant = Canbus.ecu_req(ENGINE_COOLANT_TEMP,buffer); //Request engine coolant temp
-      Serial.print("Coolant temp: "); //Uncomment for Serial debugging
-      Serial.println(Coolant);
-      
-      Throttle = Canbus.ecu_req(THROTTLE, buffer); //Request throttle
-      Serial.print("Throttle: "); //Uncomment for Serial debugging
-      Serial.println(Throttle);
-    
+      Canbus.ecu_req(ENGINE_RPM,buffer); //Request engine RPM
+      EngineRPM = buffer;
+	  Serial.print("Engine RPM: "); //Uncomment for Serial debugging
+      Serial.println(buffer);
+      delay(100);
+	 
+      Canbus.ecu_req(VEHICLE_SPEED,buffer); //Request Vehicle speed
+      Speed = buffer;
+	  Serial.print("Vehicle speed: "); //Uncomment for Serial debugging
+      Serial.println(buffer);
+	  delay(100);
+	  
+      Canbus.ecu_req(ENGINE_COOLANT_TEMP,buffer); //Request engine coolant temp
+      Coolant = buffer;
+	  Serial.print("Coolant temp: "); //Uncomment for Serial debugging
+      Serial.println(buffer);
+	  delay(100);
+	  
+      Canbus.ecu_req(THROTTLE, buffer); //Request throttle
+      Throttle = buffer;
+	  Serial.print("Throttle: "); //Uncomment for Serial debugging
+      Serial.println(buffer);
+	  delay(100);
+	  
       digitalWrite(LED3, LOW); //Turn off LED3
-      delay(1000);
+      delay(500);
       
     File  dataFile = SD.open("data.txt", FILE_WRITE); //Open uSD file to log data
       
@@ -206,16 +225,35 @@ void loop(){
         if(uart_gps.available())     // While there is data on the RX pin...
            {
              digitalWrite(LED2, HIGH); //Signal on D8 that GPS data received.
-             int c = uart_gps.read();    // load the data into a variable...
-             if(gps.encode(c))      // if there is a new valid sentence...
-             {
-               getgps(gps);         // then grab the data.
-             }
+			 
+			 //Print Latitude/Longitude to SD card
+             dataFile.print("Lat/Long: "); 
+			 dataFile.print(latitude,5); 
+			 dataFile.print(", "); 
+			 dataFile.println(longitude,5);
+			 
+			  // Print data and time to SD card
+			 dataFile.print("Date: "); dataFile.print(month, DEC); dataFile.print("/"); 
+			 dataFile.print(day, DEC); dataFile.print("/"); dataFile.print(year);
+			 dataFile.print("  Time: "); dataFile.print(hour, DEC); dataFile.print(":"); 
+			 dataFile.print(minute, DEC); dataFile.print(":"); dataFile.print(second, DEC); 
+			 dataFile.print("."); dataFile.println(hundredths, DEC);
+			 
+			  //Print Altitude, Course, & GPS speed to SD card
+			  dataFile.print("Altitude(m): ");
+			  dataFile.println(altitude);
+			  dataFile.print("Course(deg): ");
+			  dataFile.println(course);
+			  dataFile.print("GPS Speed(kmph): ");
+			  dataFile.println(gps_speed);
+			  dataFile.println();
+			  
              digitalWrite(LED2, LOW); //Turn off D8 LED. 
            }
         
         dataFile.print("Engine RPM: "); 
         dataFile.println(EngineRPM);
+		
         dataFile.print("Vehicle speed: "); 
         dataFile.println(Speed);
         
@@ -245,34 +283,15 @@ void clear_lcd(void)
 //********************************GPS Functions*********************************//
 void getgps(TinyGPS &gps)
 {
-  
-  // Define the variables that will be used
-  float latitude, longitude;
-  // Then call this function
+  // Receive GPS latitude/longitude
   gps.f_get_position(&latitude, &longitude);
-  // You can now print variables latitude and longitude
-  dataFile.print("Lat/Long: "); 
-  dataFile.print(latitude,5); 
-  dataFile.print(", "); 
-  dataFile.println(longitude,5);
-  
-  // Same goes for date and time
-  int year;
-  byte month, day, hour, minute, second, hundredths;
+ 
+  //Call function to receive date and time from GPS
   gps.crack_datetime(&year,&month,&day,&hour,&minute,&second,&hundredths);
-  // Print data and time
-  dataFile.print("Date: "); dataFile.print(month, DEC); dataFile.print("/"); 
-  dataFile.print(day, DEC); dataFile.print("/"); dataFile.print(year);
-  dataFile.print("  Time: "); dataFile.print(hour, DEC); dataFile.print(":"); 
-  dataFile.print(minute, DEC); dataFile.print(":"); dataFile.print(second, DEC); 
-  dataFile.print("."); dataFile.println(hundredths, DEC);
-  
-  // Here you can print the altitude and course values directly since 
-  // there is only one value for the function
-  dataFile.print("Altitude(m): "); dataFile.println(gps.f_altitude());  
-  // Same goes for course
-  dataFile.print("Course(deg): "); dataFile.println(gps.f_course()); 
-  // And same goes for speed
-  dataFile.print("GPS Speed(kmph): "); dataFile.println(gps.f_speed_kmph());
-  dataFile.println();
+ 
+  //Also collect altitude, course and gps_speed
+  altitude = gps.f_altitude();  
+  course = gps.f_course(); 
+  gps_speed = gps.f_speed_kmph();
+
 }

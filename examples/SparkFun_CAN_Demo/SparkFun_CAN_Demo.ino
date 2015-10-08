@@ -68,50 +68,44 @@ while(Serial.available()){
    UserInput = Serial.read();
 
 if (UserInput=='1'){
- data=Canbus.ecu_req(VEHICLE_SPEED, buffer);
+ Canbus.ecu_req(VEHICLE_SPEED, buffer);
  Serial.print("Vehicle Speed: ");
- Serial.print(data);
- Serial.println(" km/hr ");
- delay(1000);
+ Serial.println(buffer);
+ delay(500);
 }
 else if (UserInput=='2'){
- data= Canbus.ecu_req(ENGINE_RPM, buffer);
+ Canbus.ecu_req(ENGINE_RPM, buffer);
  Serial.print("Engine RPM: ");
- Serial.print(data);
- Serial.println(" rpm ");
- delay(1000);
+ Serial.println(buffer);
+ delay(500);
 
 }
 else if (UserInput=='3'){
- data= Canbus.ecu_req(THROTTLE, buffer);
+ Canbus.ecu_req(THROTTLE, buffer);
  Serial.print("Throttle: ");
-  Serial.print(data);
- Serial.println(" %% ");
- delay(1000);
+ Serial.println(buffer);
+ delay(500);
 
 }
 else if (UserInput=='4'){
- data =Canbus.ecu_req(ENGINE_COOLANT_TEMP, buffer);
+ Canbus.ecu_req(ENGINE_COOLANT_TEMP, buffer);
  Serial.print("Engine Coolant Temp: ");
- Serial.print(data);
- Serial.println(" degC");
- delay(1000);
+ Serial.println(buffer);
+ delay(500);
 
 }
 else if (UserInput=='5'){
- data=Canbus.ecu_req(O2_VOLTAGE, buffer);
+ Canbus.ecu_req(O2_VOLTAGE, buffer);
  Serial.print("O2 Voltage: ");
- Serial.print(data);
- Serial.println(" V");
- delay(1000);
+ Serial.println(buffer);
+ delay(500);
 
 }
 else if (UserInput=='6'){
- data=Canbus.ecu_req(MAF_SENSOR, buffer);
+ Canbus.ecu_req(MAF_SENSOR, buffer);
  Serial.print("MAF Sensor: ");
- Serial.print(data);
- Serial.println(" g/s");
- delay(1000);
+ Serial.println(buffer);
+ delay(500);
 
 }
 else
