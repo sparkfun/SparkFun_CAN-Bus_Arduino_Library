@@ -126,53 +126,6 @@ char CanbusClass::ecu_req(unsigned char pid,  char *buffer)
 
 					if (mcp2515_get_message(&message)) 
 					{
-							// if((message.id == PID_REPLY) && (message.data[2] == pid))	// Check message is the reply and its the right PID
-							// {	
-								// Details from http://en.wikipedia.org/wiki/OBD-II_PIDs
-								// if(message.data[2] = ENGINE_RPM)
-								// {   
-									// //ENGINE_RPM:  			 ((A*256)+B)/4    [RPM]
-									// engine_data =  (((message.data[3]*256) + message.data[4])/4);
-									// sprintf(buffer,"%d rpm ",(int) engine_data);
-								// }
-								// else if(message.data[2] = ENGINE_COOLANT_TEMP)
-								// {
-									// //ENGINE_COOLANT_TEMP: 	A-40			  [degree C]
-									// engine_data =  (message.data[3] - 40);
-									// sprintf(buffer,"%d degC",(int) engine_data);
-								// }
-								// else if(message.data[2] = VEHICLE_SPEED)
-								// {
-									// //VEHICLE_SPEED: 		 A				  [km]
-									// engine_data =  (message.data[3]);
-									// sprintf(buffer,"%d km ",(int) engine_data);
-								// }
-								// else if(message.data[2] = MAF_SENSOR)
-								// {
-									// //MAF_SENSOR:   			((256*A)+B) / 100  [g/s]
-									// engine_data =  (((message.data[3]*256) + message.data[4])/100);
-									// sprintf(buffer,"%d g/s",(int) engine_data);
-								// }
-								// else if(message.data[2] = O2_VOLTAGE)
-								// {
-									// //O2_VOLTAGE:    		A * 0.005   (B-128) * 100/128 (if B==0xFF, sensor is not used in trim calc)
-									// engine_data = (message.data[3]*0.005);
-									// sprintf(buffer,"%d V",(int) engine_data);
-								// }
-								// else if(message.data[2] = THROTTLE)
-								// {
-									// //THROTTLE:				// Throttle Position
-									// engine_data = ((message.data[3]*100)/255);
-									// sprintf(buffer,"%d %% ",(int) engine_data);
-							
-								// }
-								// else
-								// {
-									// engine_data = message.data[3];
-									// sprintf(buffer,"%d", (int) engine_data);
-								// }
-								// //return engine_data;
-							// }
 							switch(message.data[2])
 								{   /* Details from http://en.wikipedia.org/wiki/OBD-II_PIDs */
 									case ENGINE_RPM:  			//   ((A*256)+B)/4    [RPM]
@@ -183,25 +136,23 @@ char CanbusClass::ecu_req(unsigned char pid,  char *buffer)
 									case ENGINE_COOLANT_TEMP: 	// 	A-40			  [degree C]
 									engine_data =  message.data[3] - 40;
 									sprintf(buffer,"%d degC",(int) engine_data);
-							
 									break;
 							
 									case VEHICLE_SPEED: 		// A				  [km]
 									engine_data =  message.data[3];
 									sprintf(buffer,"%d km ",(int) engine_data);
-							
 									break;
 
 									case MAF_SENSOR:   			// ((256*A)+B) / 100  [g/s]
 									engine_data =  ((message.data[3]*256) + message.data[4])/100;
 									sprintf(buffer,"%d g/s",(int) engine_data);
-							
 									break;
 
 									case O2_VOLTAGE:    		// A * 0.005   (B-128) * 100/128 (if B==0xFF, sensor is not used in trim calc)
 									engine_data = message.data[3]*0.005;
 									sprintf(buffer,"%d V",(int) engine_data);
-							
+									break;
+									
 									case THROTTLE:				// Throttle Position
 									engine_data = (message.data[3]*100)/255;
 									sprintf(buffer,"%d %% ",(int) engine_data);

@@ -79,19 +79,15 @@ byte hour;
 byte minute;
 byte second;
 byte hundredths;
-float altitude;
 float gps_speed;
-char course;
+
 
 //Declare SD File
 File dataFile;
 
 //Declare CAN variables for communication
 char *EngineRPM;
-char *Coolant;
-char *Speed;
-char *Throttle;
-char buffer[128];  //Data will be temporarily stored to this buffer before being written to the file
+char buffer[64];  //Data will be temporarily stored to this buffer before being written to the file
 
 //Define LCD Positions
 #define COMMAND 0xFE
@@ -178,35 +174,18 @@ void loop(){
       digitalWrite(LED3, HIGH); //Turn on LED to indicate CAN Bus traffic
       
       Canbus.ecu_req(ENGINE_RPM,buffer); //Request engine RPM
-      EngineRPM = buffer;
+	  EngineRPM = buffer;
 	  Serial.print("Engine RPM: "); //Uncomment for Serial debugging
       Serial.println(buffer);
       delay(100);
 	 
-      Canbus.ecu_req(VEHICLE_SPEED,buffer); //Request Vehicle speed
-      Speed = buffer;
-	  Serial.print("Vehicle speed: "); //Uncomment for Serial debugging
-      Serial.println(buffer);
-	  delay(100);
-	  
-      Canbus.ecu_req(ENGINE_COOLANT_TEMP,buffer); //Request engine coolant temp
-      Coolant = buffer;
-	  Serial.print("Coolant temp: "); //Uncomment for Serial debugging
-      Serial.println(buffer);
-	  delay(100);
-	  
-      Canbus.ecu_req(THROTTLE, buffer); //Request throttle
-      Throttle = buffer;
-	  Serial.print("Throttle: "); //Uncomment for Serial debugging
-      Serial.println(buffer);
-	  delay(100);
 	  
       digitalWrite(LED3, LOW); //Turn off LED3
       delay(500);
       
     File  dataFile = SD.open("data.txt", FILE_WRITE); //Open uSD file to log data
       
-      //If data file exists, write data to it
+      //If data file can't be opened, throw error.
       if (!dataFile){
           clear_lcd();
         lcd.print("Error opening");
@@ -239,29 +218,15 @@ void loop(){
 			 dataFile.print(minute, DEC); dataFile.print(":"); dataFile.print(second, DEC); 
 			 dataFile.print("."); dataFile.println(hundredths, DEC);
 			 
-			  //Print Altitude, Course, & GPS speed to SD card
-			  dataFile.print("Altitude(m): ");
-			  dataFile.println(altitude);
-			  dataFile.print("Course(deg): ");
-			  dataFile.println(course);
+			  //Print GPS speed to SD card
 			  dataFile.print("GPS Speed(kmph): ");
 			  dataFile.println(gps_speed);
-			  dataFile.println();
 			  
              digitalWrite(LED2, LOW); //Turn off D8 LED. 
            }
         
         dataFile.print("Engine RPM: "); 
         dataFile.println(EngineRPM);
-		
-        dataFile.print("Vehicle speed: "); 
-        dataFile.println(Speed);
-        
-        dataFile.print("Coolant temp: "); 
-        dataFile.println(Coolant);
-        
-        dataFile.print("Throttle: "); 
-        dataFile.println(Throttle);
         
         dataFile.println();
         dataFile.flush();
@@ -289,9 +254,7 @@ void getgps(TinyGPS &gps)
   //Call function to receive date and time from GPS
   gps.crack_datetime(&year,&month,&day,&hour,&minute,&second,&hundredths);
  
-  //Also collect altitude, course and gps_speed
-  altitude = gps.f_altitude();  
-  course = gps.f_course(); 
+  //Also collect gps_speed
   gps_speed = gps.f_speed_kmph();
 
 }
