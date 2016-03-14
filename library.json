@@ -1,0 +1,26 @@
+{
+  "name": "Canbus",
+  "keywords": "can, bus, mcp2515, MCP-2515",
+  "description": "Library provies basic functionality of all hardware features on the CAN-Bus Shield (CAN communication, serial LCD functionality, uSD logging, GPS tracking, and joystick input).",
+  "authors": [
+    {
+      "name": "SparkFun Electronics",
+      "maintainer": true
+    },
+    {
+      "name": "Sukking Pang",
+      "url": "http://skpang.co.uk/"
+    },
+    {
+      "name": "Fabian Greif"
+    }
+  ],
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/aaronmitti/SparkFun_CAN-Bus_Arduino_Library.git"
+  },
+  "version": "5.0.0",
+  "frameworks": "arduino",
+  "platforms": "*"
+}
