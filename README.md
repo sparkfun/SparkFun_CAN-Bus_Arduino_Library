@@ -1,7 +1,7 @@
 SparkFun CAN-Bus Arduino Library
 ========================================
 
-![SparkFun CAN-Bus Shield](https://cdn.sparkfun.com/assets/parts/1/0/4/6/6/10039-01.jpg)
+![SparkFun CAN-Bus Shield](https://cdn.sparkfun.com//assets/parts/1/0/4/6/6/13262-01.jpg)
 
 [*SparkFun CAN-Bus Shield (DEV-13262)*](https://www.sparkfun.com/products/13262)
 
