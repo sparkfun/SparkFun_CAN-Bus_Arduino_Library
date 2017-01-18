@@ -5,7 +5,7 @@ SparkFun CAN-Bus Arduino Library
 
 [*SparkFun CAN-Bus Shield (DEV-13262)*](https://www.sparkfun.com/products/13262)
 
-<Basic description of the library.>
+Arduino library for using all features of the CAN-Bus Shield. 
 
 Repository Contents
 -------------------

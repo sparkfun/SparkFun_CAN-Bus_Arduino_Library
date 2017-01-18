@@ -20,7 +20,7 @@
     "type": "git",
     "url": "https://github.com/aaronmitti/SparkFun_CAN-Bus_Arduino_Library.git"
   },
-  "version": "5.0.0",
+  "version": "5.1.0",
   "frameworks": "arduino",
   "platforms": "*"
 }
