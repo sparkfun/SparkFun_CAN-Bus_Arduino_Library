@@ -26,11 +26,12 @@
  ** MOSI - pin 11
  ** MISO - pin 12
  ** CLK - pin 13
- ** CS - pin 4
+ ** CS - pin 4 (Ethernet Shield)
+ ** CS - pin 9 (CAN-Bus Shield)
  
  This example code is in the public domain.
  */
- 
+
 #include <SPI.h>
 #include <SD.h>
 
@@ -38,25 +39,29 @@
 // used as the CS pin, the hardware CS pin (10 on most Arduino boards,
 // 53 on the Mega) must be left as an output or the SD library
 // functions will not work.
+const int hwChipSelect = 10;
 
 // Chip Select pin is tied to pin 9 on the SparkFun CAN-Bus Shield
-const int chipSelect = 9;  
+const int chipSelect = 9;
 
 void setup()
 {
   // Open serial communications and wait for port to open:
   Serial.begin(9600);
-  while (!Serial) {
+  while (!Serial)
+  {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
 
   Serial.print("Initializing SD card...");
   // make sure that the default chip select pin is set to
   // output, even if you don't use it:
+  pinMode(hwChipSelect, OUTPUT);
   pinMode(chipSelect, OUTPUT);
 
   // see if the card is present and can be initialized:
-  if (!SD.begin(chipSelect)) {
+  if (!SD.begin(chipSelect))
+  {
     Serial.println("Card failed, or not present");
     // don't do anything more:
     return;
@@ -71,51 +76,39 @@ void loop()
 
   // open the file. note that only one file can be open at a time,
   // so you have to close this one before opening another.
-  // this opens the file and appends to the end of file
+  // This opens the file and appends to the end of file;
   // if the file does not exist, this will create a new file.
   File dataFile = SD.open("datalog.txt", FILE_WRITE);
 
   // if the file is available, write to it:
-  if (dataFile)   {  
-    int timeStamp = millis();
-    //write to uSD card
-    dataFile.print(timeStamp);
-    dataFile.print(" ms");
-    dataFile.print(", ");
-    //output also on Serial monitor for debugging
-    Serial.print(timeStamp);
-    Serial.print(",");
+  if (dataFile)
+  {
+    unsigned int timeStamp = millis();
+
+    // add a timestamp to the log string
+    dataString += timeStamp;
+    dataString += " ms";
 
     // read three sensors on A0, A1, and A2 while appending to the string:
-    for (int analogPin = 0; analogPin < 3; analogPin++) 
+    for (int analogPin = 0; analogPin < 3; analogPin++)
     {
       int sensorVal = analogRead(analogPin);
-      //write analog sensor data to uSD card
-      dataFile.print(" Analog Pin A");
-      dataFile.print(analogPin);
-      dataFile.print(" = ");
-      dataFile.print(sensorVal);
-      //output also on Serial monitor for debugging
-      Serial.print(" Analog Pin A");
-      Serial.print(analogPin);
-      Serial.print(" = ");
-      Serial.print(sensorVal);
-      //place comma between the analog sensor data
-      if (analogPin < 3) 
-      {
-        dataString += ","; 
-      }
-    }
-    dataFile.println(); //create a new row to read data more clearly
-    dataFile.close();   //close file
-    Serial.println();   //print to the serial port too:
 
-  }  
+      // add analog data point to the log string
+      dataString += ", ";
+      dataString += "Analog Pin A";
+      dataString += analogPin;
+      dataString += " = ";
+      dataString += sensorVal;
+    }
+
+    dataFile.println(dataString); //create a new row to read data more clearly
+    dataFile.close();             //close file
+    Serial.println(dataString);   //print to the serial port too:
+  }
   // if the file isn't open, pop up an error:
   else
   {
     Serial.println("error opening datalog.txt");
-
-  } 
+  }
 }
-
